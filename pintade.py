@@ -38,7 +38,9 @@ stock_grain = 500 #kg
 surface_int = 200 #m²
 surface_ext = 200 #m²
 
-tps_simulaton = 1000 #mois
+surface_ajoutee = 50 #m²
+
+tps_simulaton = 12 #ans
 
 tab_pondeuse = tps_vie*[0]
 tab_standard = tps_maturation_standard*[0]
@@ -105,22 +107,18 @@ def capacite_pintade():
 
 def evo_label_rouge():
 	vendre_label_rouge()
-	tab_label_rouge_temp = tab_label_rouge
 	for index in range(len(tab_label_rouge)-1):
-		tab_label_rouge[len(tab_label_rouge) - index - 1] = tab_label_rouge_temp[len(tab_label_rouge) - index - 2]
+		tab_label_rouge[len(tab_label_rouge) - index - 1] = tab_label_rouge[len(tab_label_rouge) - index - 2]
 
 def evo_standard():
 	vendre_standard()
-	tab_standard_temp = tab_standard
 	for index in range(len(tab_standard)-1):
-		tab_standard[len(tab_standard) - index - 1] = tab_standard_temp[len(tab_standard) - index - 2]
+		tab_standard[len(tab_standard) - index - 1] = tab_standard[len(tab_standard) - index - 2]
 
 def evo_pondeuse():
 	vendre_vieille()
-	tab_pondeuse_temp = tab_pondeuse
-	print "tab_pondeuse_temp" + str(tab_pondeuse_temp)
 	for index in range(len(tab_pondeuse)-1):
-		tab_pondeuse[len(tab_pondeuse) - index - 1] = tab_pondeuse_temp[len(tab_pondeuse) - index - 2]
+		tab_pondeuse[len(tab_pondeuse) - index - 1] = tab_pondeuse[len(tab_pondeuse) - index - 2]
 
 
 
@@ -155,20 +153,62 @@ def compte_pintade():
 
 
 
-def augmenter_surface_int(surface_ajoutee):
+def augmenter_surface_int():
 	global stock_argent
 	global surface_int
 	surface_int += surface_ajoutee
 	stock_argent -= surface_ajoutee*prix_surface_int
 	
-def augmenter_surface_ext(surface_ajoutee):
+def augmenter_surface_ext():
 	global stock_argent
 	global surface_ext
 	surface_ext += surface_ajoutee
 	stock_argent -= surface_ajoutee*prix_surface_ext
 
+def choix_augmenter_terrain():
+	global stock_argent
+	global stock_grain
+	global surface_int
+	global surface_ext
+	global tab_pondeuse
+	global tab_standard
+	global tab_label_rouge
+	stock_argent_temp = stock_argent
+	stock_grain_temp = stock_grain
+	surface_int_temp = surface_int
+	surface_ext_temp = surface_ext
+	tab_pondeuse_temp = tab_pondeuse
+	tab_standard_temp = tab_standard
+	tab_label_rouge_temp = tab_label_rouge
 
-	
+	simulation_annee()
+	argent_augm_int = stock_argent
+
+	stock_argent = stock_argent_temp
+	stock_grain = stock_grain_temp
+	surface_int = surface_int_temp
+	surface_ext = surface_ext_temp
+	tab_pondeuse = tab_pondeuse_temp
+	tab_standard = tab_standard_temp
+	tab_label_rouge = tab_label_rouge_temp
+
+	simulation_annee()
+	argent_augm_ext = stock_argent
+
+	stock_argent = stock_argent_temp
+	stock_grain = stock_grain_temp
+	surface_int = surface_int_temp
+	surface_ext = surface_ext_temp
+	tab_pondeuse = tab_pondeuse_temp
+	tab_standard = tab_standard_temp
+	tab_label_rouge = tab_label_rouge_temp
+
+	if max(argent_augm_int, argent_augm_ext) == argent_augm_int:
+		augmenter_surface_int()
+	else:
+		augmenter_surface_ext()
+
+
 def vendre_label_rouge():
 	global stock_argent
 	stock_argent += tab_label_rouge[tps_maturation_label_rouge-1]*masse_label_rouge*prix_label_rouge
@@ -205,20 +245,25 @@ def acheter_du_grain():
 
 
 
+def simulation_annee():
+	for iteration_mois in range(12):
+		gestion_des_oeufs()
+		acheter_du_grain()
+		consommation_de_grain()
+		# print "---------------------"
+		# print "argent = " + str(stock_argent) + ", grain = " + str(stock_grain)
+		# print "pondeuse" + str(tab_pondeuse)
+		# print "standard" + str(tab_standard)
+		# print "label rouge" + str(tab_label_rouge)
+
 def simulation():
 	print "simulation"
 	print "pondeuse" + str(tab_pondeuse)
 	print "standard" + str(tab_standard)
 	print "label rouge" + str(tab_label_rouge)
-	for iteration in range(tps_simulaton):
-		gestion_des_oeufs()
-		acheter_du_grain()
-		consommation_de_grain()
-		print "---------------------"
-		print "argent = " + str(stock_argent) + ", grain = " + str(stock_grain)
-		print "pondeuse" + str(tab_pondeuse)
-		print "standard" + str(tab_standard)
-		print "label rouge" + str(tab_label_rouge)
+	for iteration_annee in range(tps_simulaton):
+		simulation_annee()
+		choix_augmenter_terrain()
 	print "capacite totale = " + str(capacite_pintade()[0]) + ", capacite label rouge = " + str(capacite_pintade()[1]) + ", capacite standard = " + str(capacite_pintade()[2]) + ", capacite pondeuse = " + str(capacite_pintade()[3])
 	print compte_pintade()
 	print compte_pondeuse()
