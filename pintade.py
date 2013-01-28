@@ -3,6 +3,9 @@
 
 import glpk
 import math
+from matplotlib import *
+import matplotlib.pyplot as plt
+from pylab import *
 
 tps_vie = 96 #8ans = 96mois
 tps_maturation_sexuelle = 7 #mois
@@ -33,14 +36,24 @@ prix_surface_int = 1000 #euros/m²
 prix_surface_ext = 10 #euros/m²
 prix_grain = 1 #euros/kg de grain
 
+surface_ajoutee = 50 #m²
+
+tps_simulaton = 20 #ans
+
 stock_argent = 5000 #euros
 stock_grain = 500 #kg
 surface_int = 200 #m²
 surface_ext = 200 #m²
 
-surface_ajoutee = 50 #m²
-
-tps_simulaton = 20 #ans
+figure = plt.figure()
+tab_stock_argent = [stock_argent]
+tab_stock_grain = [stock_grain]
+tab_surface_int = [surface_int]
+tab_surface_ext = [surface_ext]
+tab_nb_pintade = []
+tab_nb_pondeuse = []
+tab_nb_standard = [0]
+tab_nb_label_rouge = [0]
 
 tab_pondeuse = tps_vie*[0]
 tab_standard = tps_maturation_standard*[0]
@@ -52,6 +65,8 @@ def pondeuse_initale():
 		if capacite_pondeuse >= 0:
 			capacite_pondeuse -= 10
 			tab_pondeuse[index] = 10
+	tab_nb_pintade.append(compte_pintade())
+	tab_nb_pondeuse.append(compte_pondeuse())
 
 def gestion_des_oeufs():
 	nb_disparu = tab_standard[len(tab_standard)-1] + tab_label_rouge[len(tab_label_rouge)-1] + tab_pondeuse[len(tab_pondeuse)-1]
@@ -196,7 +211,7 @@ def choix_augmenter_terrain():
 	tab_standard_temp = tab_standard
 	tab_label_rouge_temp = tab_label_rouge
 
-	simulation_annee()
+	simulation_annee_augmenter_terrain()
 	argent_augm_int = stock_argent
 
 	stock_argent = stock_argent_temp
@@ -207,7 +222,7 @@ def choix_augmenter_terrain():
 	tab_standard = tab_standard_temp
 	tab_label_rouge = tab_label_rouge_temp
 
-	simulation_annee()
+	simulation_annee_augmenter_terrain()
 	argent_augm_ext = stock_argent
 
 	stock_argent = stock_argent_temp
@@ -222,6 +237,8 @@ def choix_augmenter_terrain():
 		augmenter_surface_int()
 	else:
 		augmenter_surface_ext()
+	tab_surface_int.append(surface_int)
+	tab_surface_ext.append(surface_ext)
 
 
 def vendre_label_rouge():
@@ -259,7 +276,8 @@ def acheter_du_grain():
 		stock_argent -= grain_acheter*prix_grain
 
 
-def simulation_annee():
+
+def simulation_annee_augmenter_terrain():
 	for iteration_mois in range(12):
 		gestion_des_oeufs()
 		acheter_du_grain()
@@ -270,27 +288,47 @@ def simulation_annee_principale():
 		gestion_des_oeufs()
 		acheter_du_grain()
 		consommation_de_grain()
-		print "---------------------"
-		print "argent = " + str(stock_argent) + ", grain = " + str(stock_grain)
-		print "pondeuse" + str(tab_pondeuse)
-		print "standard" + str(tab_standard)
-		print "label rouge" + str(tab_label_rouge)
+		tab_stock_argent.append(stock_argent)
+		tab_stock_grain.append(stock_grain)
+		tab_nb_pintade.append(compte_pintade())
+		tab_nb_pondeuse.append(compte_pondeuse())
+		tab_nb_standard.append(compte_standard())
+		tab_nb_label_rouge.append(compte_label_rouge())
 
 def simulation():
-	print "simulation"
-	print "pondeuse" + str(tab_pondeuse)
-	print "standard" + str(tab_standard)
-	print "label rouge" + str(tab_label_rouge)
 	for iteration_annee in range(tps_simulaton):
-		print "****************"
 		simulation_annee_principale()
 		choix_augmenter_terrain()
-		print "surface_int = " + str(surface_int) + ", surface_ext = " + str(surface_ext)
 	print "capacite totale = " + str(capacite_pintade()[0]) + ", capacite label rouge = " + str(capacite_pintade()[1]) + ", capacite standard = " + str(capacite_pintade()[2]) + ", capacite pondeuse = " + str(capacite_pintade()[3])
-	print compte_pintade()
-	print compte_pondeuse()
-	print compte_standard()
-	print compte_label_rouge()
+
+	print len(tab_stock_argent)
+	print len(tab_stock_grain)
+	print len(tab_surface_int)
+	print len(tab_surface_ext)
+	print len(tab_nb_pintade)
+	print len(tab_nb_pondeuse)
+	print len(tab_nb_standard)
+	print len(tab_nb_label_rouge)
+
+	trace(tab_stock_argent, 421, "argent")
+	trace(tab_stock_grain, 422, "grain")
+	trace(tab_surface_int, 423, "surface int")
+	trace(tab_surface_ext, 424, "surface ext")
+	trace(tab_nb_pintade, 425, "nb pintade")
+	trace(tab_nb_pondeuse, 426, "nb pondeuse")
+	trace(tab_nb_standard, 427, "nb standard")
+	trace(tab_nb_label_rouge, 428, "nb label rouge")
+
+def trace(liste, numero_figure, titre):
+		ax = figure.add_subplot(numero_figure)
+		abscisse = []
+		for iteration in range(len(liste)):
+			abscisse.append(iteration)
+		abscisses = abscisse
+		ordonnees = liste
+		title(titre)
+		return ax.plot(abscisses, ordonnees, 'o-')
+
 
 if __name__ == "__main__":
 	pondeuse_initale()
