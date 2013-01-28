@@ -40,7 +40,7 @@ surface_ext = 200 #m²
 
 surface_ajoutee = 50 #m²
 
-tps_simulaton = 12 #ans
+tps_simulaton = 20 #ans
 
 tab_pondeuse = tps_vie*[0]
 tab_standard = tps_maturation_standard*[0]
@@ -59,21 +59,36 @@ def gestion_des_oeufs():
 	evo_label_rouge()
 	evo_standard()
 	evo_pondeuse()
-	if nb_oeuf_restant > 0 and compte_pondeuse() < capacite_pintade()[3]:
-		nb_nouvelle_pondeuse = math.ceil(((capacite_pintade()[3] - compte_pondeuse())/len(tab_pondeuse)))
-		tab_pondeuse[0] = nb_nouvelle_pondeuse
-		nb_oeuf_restant -= nb_nouvelle_pondeuse
-
-	if nb_oeuf_restant > 0 and compte_label_rouge() < capacite_pintade()[1]:
-		nb_nouvelle_label_rouge = math.ceil(((capacite_pintade()[1] - compte_label_rouge())/len(tab_label_rouge)))
-		tab_label_rouge[0] = nb_nouvelle_label_rouge
-		nb_oeuf_restant -= nb_nouvelle_label_rouge
-
-	if nb_oeuf_restant > 0 and compte_standard() < capacite_pintade()[2]:
-		nb_nouvelle_standard = math.ceil(((capacite_pintade()[2] - compte_label_rouge())/len(tab_standard)))
-		tab_standard[0] = nb_nouvelle_standard
-		nb_oeuf_restant -= nb_nouvelle_standard
+	nb_oeuf_restant = naitre_pondeuse(nb_oeuf_restant)
+	nb_oeuf_restant = naitre_label_rouge(nb_oeuf_restant)
+	nb_oeuf_restant = naitre_standard(nb_oeuf_restant)
 	vendre_oeuf(nb_oeuf_restant)
+
+def naitre_label_rouge(nb_oeuf):
+	if nb_oeuf > 0 and compte_label_rouge() < capacite_pintade()[1]:
+		capacite_reguliere = capacite_pintade()[1]/len(tab_label_rouge)
+		nb_nouvelle_label_rouge = math.ceil(min(nb_oeuf, capacite_reguliere))
+		tab_label_rouge[0] = nb_nouvelle_label_rouge
+		nb_oeuf -= nb_nouvelle_label_rouge
+	return nb_oeuf
+
+def naitre_standard(nb_oeuf):
+	if nb_oeuf > 0 and compte_standard() < capacite_pintade()[2]:
+		capacite_reguliere = capacite_pintade()[2]/len(tab_standard)
+		nb_nouvelle_standard = math.ceil(min(nb_oeuf, capacite_reguliere))
+		tab_standard[0] = nb_nouvelle_standard
+		nb_oeuf -= nb_nouvelle_standard
+	return nb_oeuf
+
+def naitre_pondeuse(nb_oeuf):
+	if nb_oeuf > 0 and compte_pondeuse() < capacite_pintade()[3]:
+		capacite_reguliere = capacite_pintade()[3]/len(tab_pondeuse)
+		nb_nouvelle_pondeuse = math.ceil(min(nb_oeuf, capacite_reguliere))
+		tab_pondeuse[0] = nb_nouvelle_pondeuse
+		nb_oeuf -= nb_nouvelle_pondeuse
+	return nb_oeuf
+
+
 
 def capacite_pintade():
 	lp_capacite = glpk.LPX()
@@ -244,17 +259,22 @@ def acheter_du_grain():
 		stock_argent -= grain_acheter*prix_grain
 
 
-
 def simulation_annee():
 	for iteration_mois in range(12):
 		gestion_des_oeufs()
 		acheter_du_grain()
 		consommation_de_grain()
-		# print "---------------------"
-		# print "argent = " + str(stock_argent) + ", grain = " + str(stock_grain)
-		# print "pondeuse" + str(tab_pondeuse)
-		# print "standard" + str(tab_standard)
-		# print "label rouge" + str(tab_label_rouge)
+
+def simulation_annee_principale():
+	for iteration_mois in range(12):
+		gestion_des_oeufs()
+		acheter_du_grain()
+		consommation_de_grain()
+		print "---------------------"
+		print "argent = " + str(stock_argent) + ", grain = " + str(stock_grain)
+		print "pondeuse" + str(tab_pondeuse)
+		print "standard" + str(tab_standard)
+		print "label rouge" + str(tab_label_rouge)
 
 def simulation():
 	print "simulation"
@@ -262,8 +282,10 @@ def simulation():
 	print "standard" + str(tab_standard)
 	print "label rouge" + str(tab_label_rouge)
 	for iteration_annee in range(tps_simulaton):
-		simulation_annee()
+		print "****************"
+		simulation_annee_principale()
 		choix_augmenter_terrain()
+		print "surface_int = " + str(surface_int) + ", surface_ext = " + str(surface_ext)
 	print "capacite totale = " + str(capacite_pintade()[0]) + ", capacite label rouge = " + str(capacite_pintade()[1]) + ", capacite standard = " + str(capacite_pintade()[2]) + ", capacite pondeuse = " + str(capacite_pintade()[3])
 	print compte_pintade()
 	print compte_pondeuse()
