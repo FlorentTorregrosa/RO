@@ -14,6 +14,13 @@ masse_vieille = 1.5 #kg
 
 capacite_ponte = 8 #oeufs/mois/pintade
 
+surface_int_standard_et_pondeuse = 0.0625 #m²/pintade
+surface_ext_standard_et_pondeuse = 0 #m²/pintade
+surface_int_label_rouge = 0.0769 #m²/pintade
+surface_ext_label_rouge = 2 #m²/pintade
+
+fraction_pondeuse_sur_pondeuse_et_standard = 0.6 #les pondeuses et les standards sont elevees dans les memes conditions, sauf que sur 10 pintades dans ces conditions, 6 sont des pondeuses
+
 capacite_sac_grain = 25 #kg
 quantite_grain_conso = 1.5 #kg de grain/mois/pintade
 
@@ -74,14 +81,13 @@ def gestion_des_oeufs():
 	nb_disparu = tab_standard[len(tab_standard)-1] + tab_label_rouge[len(tab_label_rouge)-1] + tab_pondeuse[len(tab_pondeuse)-1]
 	nb_oeuf_restant = nb_pondeuse*capacite_ponte - nb_disparu
 	if nb_oeuf_restant > 0: #maintenir au minimum le même nombre de pintades dans l'élevage
-		if nb_standard_restant + nb_label_rouge_restant + nb_oeuf_restant < capacite_pintade()[2]: #s'il reste de la place dans l'élevage
+		if nb_standard_restant + nb_label_rouge_restant + nb_oeuf_restant < capacite_pintade()[0]: #s'il reste de la place dans l'élevage
 			#elevage grandi #TODO
 			nb_oeuf_restant -= (nb_standard_ajout + nb_label_rouge_ajout)
 	
 	vendre_oeuf(nb_oeuf_restant)
 
 def capacite_pintade():
-
 	lp_capacite = glpk.LPX()
 	lp_capacite.name = 'capacite pintade'
 	lp_capacite.obj.maximize = True
@@ -99,14 +105,15 @@ def capacite_pintade():
 	lp_capacite.cols[1].bounds = 0.0, None
 	
 	lp_capacite.obj[:] = [ 1, 1]
-	
-	lp_capacite.matrix = [ 1.0, 1.0,
-	          			   10.0, 4.0]
+	lp_capacite.matrix = [ surface_int_label_rouge, surface_int_standard_et_pondeuse,
+	          			   surface_ext_label_rouge, surface_ext_standard_et_pondeuse]
 	lp_capacite.simplex()
 	
-	print 'Z = %g;' % lp_capacite.obj.value,  # Retrieve and print obj func value
-	print '; '.join('%s = %g' % (c.name, c.primal) for c in lp_capacite.cols)	# Print struct variable names and primal values
-	return capacite_standard_pondeuse, capacite_label_rouge, capacite_totale
+	capacite_totale = lp_capacite.obj.value
+	capacite_label_rouge = lp_capacite.cols[0].primal
+	capacite_standard = (1 - fraction_pondeuse_sur_pondeuse_et_standard) * lp_capacite.cols[1].primal
+	capacite_pondeuse = fraction_pondeuse_sur_pondeuse_et_standard * lp_capacite.cols[1].primal
+	return capacite_totale, capacite_label_rouge, capacite_standard, capacite_pondeuse
 
 
 
