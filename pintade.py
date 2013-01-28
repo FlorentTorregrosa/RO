@@ -1,9 +1,21 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import glpk
+
+tps_vie = 96 #8ans = 96mois
+tps_maturation_sexuelle = 7 #mois
+tps_maturation_standard = 2 #mois
+tps_maturation_label_rouge = 3 #mois
+
 masse_standard =  1.65 #kg
 masse_label_rouge = 2 #kg
 masse_vieille = 1.5 #kg
+
+capacite_ponte = 8 #oeufs/mois/pintade
+
+capacite_sac_grain = 25 #kg
+quantite_grain_conso = 1.5 #kg de grain/mois/pintade
 
 prix_standard = 8 #euros/kg
 prix_label_rouge = 12 #euros/kg
@@ -13,57 +25,50 @@ prix_surface_int = 1000 #euros/m²
 prix_surface_ext = 10 #euros/m²
 prix_grain = 1 #euros/kg de grain
 
-tps_vie = 96 #8ans = 96mois
-tps_maturation_sexuelle = 7 #mois
-tps_maturation_standard = 2 #mois
-tps_maturation_label_rouge = 3 #mois
-
-capacite_ponte = 8 #oeufs/mois/pintade
-
-capacite_sac_grain = 25 #kg
-quantite_grain_conso = 1.5 #kg de grain/mois/pintade
-
 stock_argent = 5000 #euros
 stock_grain = 500 #kg
 surface_int = 200 #m²
 surface_ext = 200 #m²
 
-tps = 96 #mois
+tps_simulaton = 96 #mois
 
 tab_pondeuse = tps_vie*[0]
 tab_standard = tps_maturation_standard*[0]
 tab_label_rouge = tps_maturation_label_rouge*[0]
 
-nb_pintade = 0
-nb_pondeuse = 0
-nb_pondeuse_mature = 0
-nb_standard = 0
-nb_label_rouge = 0
-nb_disparue = 0
-
 #import glpk            # Import the GLPK module
 #
-#lp = glpk.LPX()        # Create empty problem instance
-#lp.name = 'sample'     # Assign symbolic name to problem
-#lp.obj.maximize = True # Set this as a maximization problem
-#lp.rows.add(3)         # Append three rows to this instance
-#for r in lp.rows:      # Iterate over all rows
+#lp_capacite = glpk.LPX()        # Create empty problem instance
+#lp_capacite.name = 'sample'     # Assign symbolic name to problem
+#lp_capacite.obj.maximize = True # Set this as a maximization problem
+#lp_capacite.rows.add(3)         # Append three rows to this instance
+#for r in lp_capacite.rows:      # Iterate over all rows
 #	r.name = chr(ord('p')+r.index) # Name them p, q, and r
-#lp.rows[0].bounds = None, 100.0  # Set bound -inf < p <= 100
-#lp.rows[1].bounds = None, 600.0  # Set bound -inf < q <= 600
-#lp.rows[2].bounds = None, 300.0  # Set bound -inf < r <= 300
-#lp.cols.add(3)         # Append three columns to this instance
-#for c in lp.cols:      # Iterate over all columns
+#lp_capacite.rows[0].bounds = None, 100.0  # Set bound -inf < p <= 100
+#lp_capacite.rows[1].bounds = None, 600.0  # Set bound -inf < q <= 600
+#lp_capacite.rows[2].bounds = None, 300.0  # Set bound -inf < r <= 300
+#lp_capacite.cols.add(3)         # Append three columns to this instance
+#for c in lp_capacite.cols:      # Iterate over all columns
 #	c.name = 'x%d' % c.index # Name them x0, x1, and x2
 #	c.bounds = 0.0, None     # Set bound 0 <= xi < inf
-#lp.obj[:] = [ 10.0, 6.0, 4.0 ]   # Set objective coefficients
-#lp.matrix = [ 1.0, 1.0, 1.0,     # Set nonzero entries of the
+#lp_capacite.obj[:] = [ 10.0, 6.0, 4.0 ]   # Set objective coefficients
+#lp_capacite.matrix = [ 1.0, 1.0, 1.0,     # Set nonzero entries of the
 #             10.0, 4.0, 5.0,     #   constraint matrix.  (In this
 #              2.0, 2.0, 6.0 ]    #   case, all are non-zero.)
-#lp.simplex()           # Solve this LP with the simplex method
-#print 'Z = %g;' % lp.obj.value,  # Retrieve and print obj func value
-#print '; '.join('%s = %g' % (c.name, c.primal) for c in lp.cols)
+#lp_capacite.simplex()           # Solve this LP with the simplex method
+#print 'Z = %g;' % lp_capacite.obj.value,  # Retrieve and print obj func value
+#print '; '.join('%s = %g' % (c.name, c.primal) for c in lp_capacite.cols)
 #                       # Print struct variable names and primal values
+
+def cequilsepasseparmois():
+	#gérér les oeufs
+	
+	evo_label_rouge()
+	evo_standard()
+	evo_pondeuse()
+	consommation_de_grain()
+	acheter_du_grain()
+	
 
 def gestion_des_oeufs():
 	nb_disparu = tab_standard[len(tab_standard)-1] + tab_label_rouge[len(tab_label_rouge)-1] + tab_pondeuse[len(tab_pondeuse)-1]
@@ -75,19 +80,32 @@ def gestion_des_oeufs():
 	
 	vendre_oeuf(nb_oeuf_restant)
 
-#ancienne version
-#def gestion_des_oeufs(nb_standard_vendues, nb_label_rouge_vendues, nb_vieille_vendues, nb_matures):
-	#nb_oeufs_restant = nb_matures*capacite_ponte - (nb_standard_vendues + nb_label_rouge_vendues + nb_vieille_vendues)
-	#if nb_oeufs_restant > 0: #maintenir au minimum le même nombre de pintades dans l'élevage
-		
-		#if nb_standard_restant + nb_label_rouge_restant + nb_oeufs_restant < capacite_pintade()[2]: #s'il reste de la place dans l'élevage
-			##elevage grandi #TODO
-			#nb_oeufs_restant -= (nb_standard_ajout + nb_label_rouge_ajout)
-	
-	#vendre_oeuf(nb_oeufs_restant)
+def capacite_pintade():
 
-def capacite_pintade(surface_int, surface_ext):
-	#TODO
+	lp_capacite = glpk.LPX()
+	lp_capacite.name = 'capacite pintade'
+	lp_capacite.obj.maximize = True
+	
+	lp_capacite.rows.add(2)
+	lp_capacite.rows[0].name = "surface int"
+	lp_capacite.rows[0].bounds = None, surface_int  #m²
+	lp_capacite.rows[1].name = "surface ext"
+	lp_capacite.rows[1].bounds = None, surface_ext  #m²
+	
+	lp_capacite.cols.add(2)
+	lp_capacite.cols[0].name = "label rouge"
+	lp_capacite.cols[0].bounds = 0.0, None
+	lp_capacite.cols[1].name = "standard + pondeuse"
+	lp_capacite.cols[1].bounds = 0.0, None
+	
+	lp_capacite.obj[:] = [ 1, 1]
+	
+	lp_capacite.matrix = [ 1.0, 1.0,
+	          			   10.0, 4.0]
+	lp_capacite.simplex()
+	
+	print 'Z = %g;' % lp_capacite.obj.value,  # Retrieve and print obj func value
+	print '; '.join('%s = %g' % (c.name, c.primal) for c in lp_capacite.cols)	# Print struct variable names and primal values
 	return capacite_standard_pondeuse, capacite_label_rouge, capacite_totale
 
 
@@ -149,14 +167,14 @@ def augmenter_surface_ext(surface_ajoutee):
 	stock_argent -= surface_ajoutee*prix_surface_ext
 
 
-
-def vendre_standard():
-	stock_argent += tab_standard[tps_maturation_standard]*masse_standard*prix_standard
-	tab_standard[tps_maturation_standard] = 0
 	
 def vendre_label_rouge():
 	stock_argent += tab_label_rouge[tps_maturation_label_rouge]*masse_label_rouge*prix_label_rouge
 	tab_label_rouge[tps_maturation_label_rouge] = 0 
+
+def vendre_standard():
+	stock_argent += tab_standard[tps_maturation_standard]*masse_standard*prix_standard
+	tab_standard[tps_maturation_standard] = 0
 	
 def vendre_vieille():
 	stock_argent += tab_pondeuse[tps_vie]*masse_vieille*prix_vieille
@@ -167,12 +185,12 @@ def vendre_oeuf(nb_oeuf_vendu):
 
 
 
-def consommation_de_grain(nb_de_pintade):
-	stock_grain -= nb_de_pintade*quantite_grain_conso
+def consommation_de_grain():
+	stock_grain -= compte_pintade()*quantite_grain_conso
 
-def acheter_du_grain(grain_en_stock):
+def acheter_du_grain():
 	nb_de_pintade = compte_pintade()
-	if grain_en_stock < consommation_de_grain(nb_de_pintade):
-		grain_acheter = nb_de_pintade*capacite_sac_grain
+	if stock_grain < consommation_de_grain(nb_de_pintade):
+		grain_acheter = nb_de_pintade*capacite_sac_grain #on achete un sac de grain par pintade pour etre tranquille pour un moment
 		stock_grain += grain_acheter
 		stock_argent -= grain_acheter*prix_grain
