@@ -46,7 +46,7 @@ tab_label_rouge = tps_maturation_label_rouge*[0]
 
 def pondeuse_initale():
 	capacite_pondeuse = capacite_pintade()[3]
-	for index in range(tab_pondeuse):
+	for index in range(len(tab_pondeuse)):
 		if capacite_pondeuse >= 0:
 			capacite_pondeuse -= 10
 			tab_pondeuse[index] = 10
@@ -57,15 +57,15 @@ def gestion_des_oeufs():
 	evo_label_rouge()
 	evo_standard()
 	evo_pondeuse()
-	if nb_oeuf_restant > 0 & compte_pondeuse() < capacite_pintade()[3]:
+	if nb_oeuf_restant > 0 and compte_pondeuse() < capacite_pintade()[3]:
 		nb_nouvelle_pondeuse = math.ceil((capacite_pintade()[3] - compte_pondeuse())*(capacite_pintade()[3])/len(tab_pondeuse))
 		tab_pondeuse[0] = nb_nouvelle_pondeuse
 		nb_oeuf_restant -= nb_nouvelle_pondeuse
-	if nb_oeuf_restant > 0 & compte_standard() < capacite_pintade()[2]:
+	if nb_oeuf_restant > 0 and compte_standard() < capacite_pintade()[2]:
 		nb_nouvelle_standard = math.ceil((capacite_pintade()[2] - compte_label_rouge())*(capacite_pintade()[2])/len(tab_standard))
 		tab_standard[0] = nb_nouvelle_standard
 		nb_oeuf_restant -= nb_nouvelle_standard
-	if nb_oeuf_restant > 0 & compte_label_rouge() < capacite_pintade()[1]:
+	if nb_oeuf_restant > 0 and compte_label_rouge() < capacite_pintade()[1]:
 		nb_nouvelle_label_rouge = math.ceil((capacite_pintade()[1] - compte_label_rouge())*(capacite_pintade()[1])/len(tab_label_rouge))
 		tab_label_rouge[0] = nb_nouvelle_label_rouge
 		nb_oeuf_restant -= nb_nouvelle_label_rouge
@@ -103,42 +103,42 @@ def capacite_pintade():
 
 def evo_label_rouge():
 	vendre_label_rouge()
-	for index in range(tab_label_rouge)-1:
+	for index in range(len(tab_label_rouge)-1):
 		tab_label_rouge[index+1] = tab_label_rouge[index]
 
 def evo_standard():
 	vendre_standard()
-	for index in range(tab_standard)-1:
+	for index in range(len(tab_standard)-1):
 		tab_standard[index+1] = tab_standard[index]
 
 def evo_pondeuse():
 	vendre_vieille()
-	for index in range(tab_pondeuse)-1:
+	for index in range(len(tab_pondeuse)-1):
 		tab_pondeuse[index+1] = tab_pondeuse[index]
 
 
 
 def compte_label_rouge():
 	nb_label_rouge = 0
-	for index in range(tab_label_rouge)-1:
+	for index in range(len(tab_label_rouge)-1):
 		nb_label_rouge += tab_label_rouge[index]
 	return nb_label_rouge
 		
 def compte_standard():
 	nb_standard = 0
-	for index in range(tab_standard)-1:
+	for index in range(len(tab_standard)-1):
 		nb_standard += tab_standard[index]
 	return nb_standard
 
 def compte_pondeuse():
 	nb_pondeuse = 0
-	for index in range(tab_pondeuse)-1:
+	for index in range(len(tab_pondeuse)-1):
 		nb_pondeuse += tab_pondeuse[index]
 	return nb_pondeuse
 		
 def compte_pondeuse_mature():
 	nb_pondeuse_mature = 0
-	for index in range(tab_pondeuse)-tps_maturation_sexuelle:
+	for index in range(len(tab_pondeuse)-tps_maturation_sexuelle):
 		nb_pondeuse_mature += tab_pondeuse[index+tps_maturation_sexuelle]
 	return nb_pondeuse_mature
 
@@ -150,38 +150,49 @@ def compte_pintade():
 
 
 def augmenter_surface_int(surface_ajoutee):
+	global stock_argent
+	global surface_int
 	surface_int += surface_ajoutee
 	stock_argent -= surface_ajoutee*prix_surface_int
 	
 def augmenter_surface_ext(surface_ajoutee):
+	global stock_argent
+	global surface_ext
 	surface_ext += surface_ajoutee
 	stock_argent -= surface_ajoutee*prix_surface_ext
 
 
 	
 def vendre_label_rouge():
-	stock_argent += tab_label_rouge[tps_maturation_label_rouge]*masse_label_rouge*prix_label_rouge
-	tab_label_rouge[tps_maturation_label_rouge] = 0 
+	global stock_argent
+	stock_argent += tab_label_rouge[tps_maturation_label_rouge-1]*masse_label_rouge*prix_label_rouge
+	tab_label_rouge[tps_maturation_label_rouge-1] = 0 
 
 def vendre_standard():
-	stock_argent += tab_standard[tps_maturation_standard]*masse_standard*prix_standard
-	tab_standard[tps_maturation_standard] = 0
+	global stock_argent
+	stock_argent += tab_standard[tps_maturation_standard-1]*masse_standard*prix_standard
+	tab_standard[tps_maturation_standard-1] = 0
 	
 def vendre_vieille():
-	stock_argent += tab_pondeuse[tps_vie]*masse_vieille*prix_vieille
-	tab_pondeuse[tps_vie] = 0
+	global stock_argent
+	stock_argent += tab_pondeuse[tps_vie-1]*masse_vieille*prix_vieille
+	tab_pondeuse[tps_vie-1] = 0
 	
 def vendre_oeuf(nb_oeuf_vendu):
+	global stock_argent
 	stock_argent += nb_oeuf_vendu*prix_oeuf
 
 
 
 def consommation_de_grain():
+	global stock_grain
 	stock_grain -= compte_pintade()*quantite_grain_conso
 
 def acheter_du_grain():
+	global stock_argent
+	global stock_grain
 	nb_de_pintade = compte_pintade()
-	if stock_grain < consommation_de_grain(nb_de_pintade):
+	if stock_grain < nb_de_pintade*quantite_grain_conso:
 		grain_acheter = nb_de_pintade*capacite_sac_grain #on achete un sac de grain par pintade pour etre tranquille pour un moment
 		stock_grain += grain_acheter
 		stock_argent -= grain_acheter*prix_grain
@@ -189,11 +200,20 @@ def acheter_du_grain():
 
 
 def simulation():
-	for iteration in len(tps_simulaton):
+	print "simulation"
+	print "pondeuse" + str(tab_pondeuse)
+	print "standard" + str(tab_standard)
+	print "label rouge" + str(tab_label_rouge)
+	for iteration in range(tps_simulaton):
 		gestion_des_oeufs()
-		consommation_de_grain()
 		acheter_du_grain()
-		print stock_argent
+		consommation_de_grain()
+		print "argent = " + str(stock_argent) + ", grain = " + str(stock_grain)
+		print "pondeuse" + str(tab_pondeuse)
+		print "standard" + str(tab_standard)
+		print "label rouge" + str(tab_label_rouge)
+	print "capacite totale = " + str(capacite_pintade()[0]) + ", capacite label rouge = " + str(capacite_pintade()[1]) + ", capacite standard = " + str(capacite_pintade()[2]) + ", capacite pondeuse = " + str(capacite_pintade()[3])
+	print compte_pintade()
 
 if __name__ == "__main__":
 	pondeuse_initale()
