@@ -61,14 +61,16 @@ def gestion_des_oeufs():
 		nb_nouvelle_pondeuse = math.ceil(((capacite_pintade()[3] - compte_pondeuse())/len(tab_pondeuse)))
 		tab_pondeuse[0] = nb_nouvelle_pondeuse
 		nb_oeuf_restant -= nb_nouvelle_pondeuse
-	if nb_oeuf_restant > 0 and compte_standard() < capacite_pintade()[2]:
-		nb_nouvelle_standard = math.ceil(((capacite_pintade()[2] - compte_label_rouge())/len(tab_standard)))
-		tab_standard[0] = nb_nouvelle_standard
-		nb_oeuf_restant -= nb_nouvelle_standard
+
 	if nb_oeuf_restant > 0 and compte_label_rouge() < capacite_pintade()[1]:
 		nb_nouvelle_label_rouge = math.ceil(((capacite_pintade()[1] - compte_label_rouge())/len(tab_label_rouge)))
 		tab_label_rouge[0] = nb_nouvelle_label_rouge
 		nb_oeuf_restant -= nb_nouvelle_label_rouge
+
+	if nb_oeuf_restant > 0 and compte_standard() < capacite_pintade()[2]:
+		nb_nouvelle_standard = math.ceil(((capacite_pintade()[2] - compte_label_rouge())/len(tab_standard)))
+		tab_standard[0] = nb_nouvelle_standard
+		nb_oeuf_restant -= nb_nouvelle_standard
 	vendre_oeuf(nb_oeuf_restant)
 
 def capacite_pintade():
@@ -103,18 +105,22 @@ def capacite_pintade():
 
 def evo_label_rouge():
 	vendre_label_rouge()
+	tab_label_rouge_temp = tab_label_rouge
 	for index in range(len(tab_label_rouge)-1):
-		tab_label_rouge[index+1] = tab_label_rouge[index]
+		tab_label_rouge[len(tab_label_rouge) - index - 1] = tab_label_rouge_temp[len(tab_label_rouge) - index - 2]
 
 def evo_standard():
 	vendre_standard()
+	tab_standard_temp = tab_standard
 	for index in range(len(tab_standard)-1):
-		tab_standard[index+1] = tab_standard[index]
+		tab_standard[len(tab_standard) - index - 1] = tab_standard_temp[len(tab_standard) - index - 2]
 
 def evo_pondeuse():
 	vendre_vieille()
+	tab_pondeuse_temp = tab_pondeuse
+	print "tab_pondeuse_temp" + str(tab_pondeuse_temp)
 	for index in range(len(tab_pondeuse)-1):
-		tab_pondeuse[index+1] = tab_pondeuse[index]
+		tab_pondeuse[len(tab_pondeuse) - index - 1] = tab_pondeuse_temp[len(tab_pondeuse) - index - 2]
 
 
 
