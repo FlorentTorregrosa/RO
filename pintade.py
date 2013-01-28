@@ -38,7 +38,7 @@ stock_grain = 500 #kg
 surface_int = 200 #m²
 surface_ext = 200 #m²
 
-tps_simulaton = 96 #mois
+tps_simulaton = 1000 #mois
 
 tab_pondeuse = tps_vie*[0]
 tab_standard = tps_maturation_standard*[0]
@@ -58,15 +58,15 @@ def gestion_des_oeufs():
 	evo_standard()
 	evo_pondeuse()
 	if nb_oeuf_restant > 0 and compte_pondeuse() < capacite_pintade()[3]:
-		nb_nouvelle_pondeuse = math.ceil((capacite_pintade()[3] - compte_pondeuse())*(capacite_pintade()[3])/len(tab_pondeuse))
+		nb_nouvelle_pondeuse = math.ceil(((capacite_pintade()[3] - compte_pondeuse())/len(tab_pondeuse)))
 		tab_pondeuse[0] = nb_nouvelle_pondeuse
 		nb_oeuf_restant -= nb_nouvelle_pondeuse
 	if nb_oeuf_restant > 0 and compte_standard() < capacite_pintade()[2]:
-		nb_nouvelle_standard = math.ceil((capacite_pintade()[2] - compte_label_rouge())*(capacite_pintade()[2])/len(tab_standard))
+		nb_nouvelle_standard = math.ceil(((capacite_pintade()[2] - compte_label_rouge())/len(tab_standard)))
 		tab_standard[0] = nb_nouvelle_standard
 		nb_oeuf_restant -= nb_nouvelle_standard
 	if nb_oeuf_restant > 0 and compte_label_rouge() < capacite_pintade()[1]:
-		nb_nouvelle_label_rouge = math.ceil((capacite_pintade()[1] - compte_label_rouge())*(capacite_pintade()[1])/len(tab_label_rouge))
+		nb_nouvelle_label_rouge = math.ceil(((capacite_pintade()[1] - compte_label_rouge())/len(tab_label_rouge)))
 		tab_label_rouge[0] = nb_nouvelle_label_rouge
 		nb_oeuf_restant -= nb_nouvelle_label_rouge
 	vendre_oeuf(nb_oeuf_restant)
@@ -208,12 +208,16 @@ def simulation():
 		gestion_des_oeufs()
 		acheter_du_grain()
 		consommation_de_grain()
+		print "---------------------"
 		print "argent = " + str(stock_argent) + ", grain = " + str(stock_grain)
 		print "pondeuse" + str(tab_pondeuse)
 		print "standard" + str(tab_standard)
 		print "label rouge" + str(tab_label_rouge)
 	print "capacite totale = " + str(capacite_pintade()[0]) + ", capacite label rouge = " + str(capacite_pintade()[1]) + ", capacite standard = " + str(capacite_pintade()[2]) + ", capacite pondeuse = " + str(capacite_pintade()[3])
 	print compte_pintade()
+	print compte_pondeuse()
+	print compte_standard()
+	print compte_label_rouge()
 
 if __name__ == "__main__":
 	pondeuse_initale()
