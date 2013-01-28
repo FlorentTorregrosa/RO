@@ -303,16 +303,6 @@ def simulation():
 		simulation_annee_principale()
 		choix_augmenter_terrain()
 	print "capacite totale = " + str(capacite_pintade()[0]) + ", capacite label rouge = " + str(capacite_pintade()[1]) + ", capacite standard = " + str(capacite_pintade()[2]) + ", capacite pondeuse = " + str(capacite_pintade()[3])
-
-	print len(tab_stock_argent)
-	print len(tab_stock_grain)
-	print len(tab_surface_int)
-	print len(tab_surface_ext)
-	print len(tab_nb_pintade)
-	print len(tab_nb_pondeuse)
-	print len(tab_nb_standard)
-	print len(tab_nb_label_rouge)
-
 	trace(tab_stock_argent, 421, "argent")
 	trace(tab_stock_grain, 422, "grain")
 	trace(tab_surface_int, 423, "surface int")
