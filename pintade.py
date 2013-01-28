@@ -3,6 +3,7 @@
 
 import glpk
 import math
+from math import *
 from matplotlib import *
 import matplotlib.pyplot as plt
 from pylab import *
@@ -67,6 +68,8 @@ def pondeuse_initale():
 			tab_pondeuse[index] = 10
 	tab_nb_pintade.append(compte_pintade())
 	tab_nb_pondeuse.append(compte_pondeuse())
+
+
 
 def gestion_des_oeufs():
 	nb_disparu = tab_standard[len(tab_standard)-1] + tab_label_rouge[len(tab_label_rouge)-1] + tab_pondeuse[len(tab_pondeuse)-1]
@@ -270,7 +273,7 @@ def acheter_du_grain():
 	global stock_argent
 	global stock_grain
 	nb_de_pintade = compte_pintade()
-	if stock_grain < nb_de_pintade*quantite_grain_conso:
+	if stock_grain < nb_de_pintade*quantite_grain_conso*3: # 3 pour avoir de la marge
 		grain_acheter = nb_de_pintade*capacite_sac_grain #on achete un sac de grain par pintade pour etre tranquille pour un moment
 		stock_grain += grain_acheter
 		stock_argent -= grain_acheter*prix_grain
@@ -318,6 +321,7 @@ def simulation():
 	trace(tab_nb_pondeuse, 426, "nb pondeuse")
 	trace(tab_nb_standard, 427, "nb standard")
 	trace(tab_nb_label_rouge, 428, "nb label rouge")
+	plt.show()
 
 def trace(liste, numero_figure, titre):
 		ax = figure.add_subplot(numero_figure)
@@ -327,7 +331,7 @@ def trace(liste, numero_figure, titre):
 		abscisses = abscisse
 		ordonnees = liste
 		title(titre)
-		return ax.plot(abscisses, ordonnees, 'o-')
+		return ax.plot(abscisses, ordonnees, '-')
 
 
 if __name__ == "__main__":
