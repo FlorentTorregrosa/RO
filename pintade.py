@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import glpk
+import math
 
 tps_vie = 96 #8ans = 96mois
 tps_maturation_sexuelle = 7 #mois
@@ -50,13 +51,6 @@ def pondeuse_initale():
 			capacite_pondeuse -= 10
 			tab_pondeuse[index] = 10
 
-def cequilsepasseparmois():
-	#gérér les oeufs
-	
-	consommation_de_grain()
-	acheter_du_grain()
-	
-
 def gestion_des_oeufs():
 	nb_disparu = tab_standard[len(tab_standard)-1] + tab_label_rouge[len(tab_label_rouge)-1] + tab_pondeuse[len(tab_pondeuse)-1]
 	nb_oeuf_restant = compte_pondeuse_mature()*capacite_ponte - nb_disparu
@@ -64,18 +58,17 @@ def gestion_des_oeufs():
 	evo_standard()
 	evo_pondeuse()
 	if nb_oeuf_restant > 0 & compte_pondeuse() < capacite_pintade()[3]:
-		nb_nouvelle_pondeuse = capacite_pintade()[3] - compte_pondeuse()
+		nb_nouvelle_pondeuse = math.ceil((capacite_pintade()[3] - compte_pondeuse())*(capacite_pintade()[3])/len(tab_pondeuse))
 		tab_pondeuse[0] = nb_nouvelle_pondeuse
 		nb_oeuf_restant -= nb_nouvelle_pondeuse
 	if nb_oeuf_restant > 0 & compte_standard() < capacite_pintade()[2]:
-		nb_nouvelle_standard = capacite_pintade()[2] - compte_label_rouge()
+		nb_nouvelle_standard = math.ceil((capacite_pintade()[2] - compte_label_rouge())*(capacite_pintade()[2])/len(tab_standard))
 		tab_standard[0] = nb_nouvelle_standard
 		nb_oeuf_restant -= nb_nouvelle_standard
 	if nb_oeuf_restant > 0 & compte_label_rouge() < capacite_pintade()[1]:
-		nb_nouvelle_label_rouge = capacite_pintade()[1] - compte_label_rouge()
+		nb_nouvelle_label_rouge = math.ceil((capacite_pintade()[1] - compte_label_rouge())*(capacite_pintade()[1])/len(tab_label_rouge))
 		tab_label_rouge[0] = nb_nouvelle_label_rouge
 		nb_oeuf_restant -= nb_nouvelle_label_rouge
-	
 	vendre_oeuf(nb_oeuf_restant)
 
 def capacite_pintade():
@@ -192,3 +185,16 @@ def acheter_du_grain():
 		grain_acheter = nb_de_pintade*capacite_sac_grain #on achete un sac de grain par pintade pour etre tranquille pour un moment
 		stock_grain += grain_acheter
 		stock_argent -= grain_acheter*prix_grain
+
+
+
+def simulation():
+	for iteration in len(tps_simulaton):
+		gestion_des_oeufs()
+		consommation_de_grain()
+		acheter_du_grain()
+		print stock_argent
+
+if __name__ == "__main__":
+	pondeuse_initale()
+	simulation()
