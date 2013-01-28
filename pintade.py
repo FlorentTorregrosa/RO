@@ -53,20 +53,28 @@ def pondeuse_initale():
 def cequilsepasseparmois():
 	#gérér les oeufs
 	
-	evo_label_rouge()
-	evo_standard()
-	evo_pondeuse()
 	consommation_de_grain()
 	acheter_du_grain()
 	
 
 def gestion_des_oeufs():
 	nb_disparu = tab_standard[len(tab_standard)-1] + tab_label_rouge[len(tab_label_rouge)-1] + tab_pondeuse[len(tab_pondeuse)-1]
-	nb_oeuf_restant = nb_pondeuse*capacite_ponte - nb_disparu
-	if nb_oeuf_restant > 0: #maintenir au minimum le même nombre de pintades dans l'élevage
-		if nb_standard_restant + nb_label_rouge_restant + nb_oeuf_restant < capacite_pintade()[0]: #s'il reste de la place dans l'élevage
-			#elevage grandi #TODO
-			nb_oeuf_restant -= (nb_standard_ajout + nb_label_rouge_ajout)
+	nb_oeuf_restant = compte_pondeuse_mature()*capacite_ponte - nb_disparu
+	evo_label_rouge()
+	evo_standard()
+	evo_pondeuse()
+	if nb_oeuf_restant > 0 & compte_pondeuse() < capacite_pintade()[3]:
+		nb_nouvelle_pondeuse = capacite_pintade()[3] - compte_pondeuse()
+		tab_pondeuse[0] = nb_nouvelle_pondeuse
+		nb_oeuf_restant -= nb_nouvelle_pondeuse
+	if nb_oeuf_restant > 0 & compte_standard() < capacite_pintade()[2]:
+		nb_nouvelle_standard = capacite_pintade()[2] - compte_label_rouge()
+		tab_standard[0] = nb_nouvelle_standard
+		nb_oeuf_restant -= nb_nouvelle_standard
+	if nb_oeuf_restant > 0 & compte_label_rouge() < capacite_pintade()[1]:
+		nb_nouvelle_label_rouge = capacite_pintade()[1] - compte_label_rouge()
+		tab_label_rouge[0] = nb_nouvelle_label_rouge
+		nb_oeuf_restant -= nb_nouvelle_label_rouge
 	
 	vendre_oeuf(nb_oeuf_restant)
 
